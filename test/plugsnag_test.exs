@@ -135,6 +135,20 @@ defmodule PlugsnagTest do
                id: "abc123"
              }
     end
+
+    test "includes a stacktrace" do
+      conn = conn(:get, "/")
+
+      assert_raise Plug.Conn.WrapperError, "** (PlugsnagTest.TestException) oops", fn ->
+        TestPlug.call(conn, [])
+      end
+
+      assert_received {:report, {%TestException{}, options}}
+
+      stacktrace = Keyword.get(options, :stacktrace)
+      # We'll just test that the stacktrace is not nil and that the key exists
+      assert is_list(stacktrace)
+    end
   end
 
   describe "4xx exception" do

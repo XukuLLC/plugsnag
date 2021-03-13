@@ -22,7 +22,7 @@ defmodule Plugsnag do
     report_error(conn, assigns, opts)
   end
 
-  defp report_error(conn, %{reason: exception}, opts) do
+  defp report_error(conn, %{reason: exception, stack: stacktrace}, opts) do
     error_report_builder =
       Keyword.get(opts, :error_report_builder, Plugsnag.BasicErrorReportBuilder)
 
@@ -30,6 +30,7 @@ defmodule Plugsnag do
       %Plugsnag.ErrorReport{}
       |> error_report_builder.build_error_report(conn)
       |> Map.from_struct()
+      |> Map.put(:stacktrace, stacktrace)
       |> Keyword.new()
 
     reporter = Application.get_env(:plugsnag, :reporter, Bugsnag)
